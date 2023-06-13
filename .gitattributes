@@ -1,5 +1,5 @@
 # always use unix line endings in all the files
-* text eof=lr
+* text=auto eol=lf
 
 # lol, git fucks up lineendings in images
 *.png binary
