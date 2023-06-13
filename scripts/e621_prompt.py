@@ -18,11 +18,15 @@ tags_categories_options = ["general", "species", "character", "copyright", "arti
 default_tags_categories = ["general", "species", "character", "artist"]
 
 # Conditionally replaces underscores
-def replace_underscores( value):
+def replace_underscores(value):
   if opts.e621_prompt_replace_underscores:
     return value.replace("_", " ")
 
   return value
+
+# Escapes some prompt-specific special characters
+def escape_special_characters(value):
+  return value.replace("(", "\(").replace(")", "\)")
 
 # Converts string of comma-separated values into set
 def comma_separated_string_to_set(string):
@@ -145,7 +149,7 @@ class Script(scripts.Script):
     prefix = getattr(opts, f"e621_prompt_{category}_prefix")
     tags = set(post["tags"][category] or []) - excluded_tags()
 
-    return set([f"{prefix}{replace_underscores(tag)}" for tag in tags])
+    return set([f"{prefix}{escape_special_characters(replace_underscores(tag))}" for tag in tags])
 
   # Converts post data into tags
   def process_post(self, post, categories):
