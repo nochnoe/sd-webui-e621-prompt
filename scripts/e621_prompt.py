@@ -1,7 +1,6 @@
 import gradio as gr
 
 from modules import scripts, script_callbacks
-from modules.ui_components import DropdownMulti
 from modules.shared import opts, OptionInfo
 
 from urllib.request import urlopen
