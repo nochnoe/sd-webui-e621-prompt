@@ -1,7 +1,6 @@
 import gradio as gr
 
 from modules import scripts, script_callbacks
-from modules.ui_components import DropdownMulti
 from modules.shared import opts, OptionInfo
 
 from urllib.request import urlopen
@@ -14,8 +13,8 @@ import requests
 NAME = "e621 Prompt"
 
 # List of tags categories. Shared between settings and UI
-tags_categories_options = ["general", "species", "character", "copyright", "artist", "invalid", "lore", "meta", "rating"]
-default_tags_categories = ["general", "species", "character", "artist"]
+tags_categories_options = ["artist", "character", "species", "copyright", "general", "lore", "meta", "rating", "invalid"]
+default_tags_categories = ["artist", "character", "species", "general"]
 
 # Conditionally replaces underscores
 def replace_underscores(value):
@@ -29,19 +28,19 @@ def escape_special_characters(value):
   return value.replace("(", "\(").replace(")", "\)")
 
 # Converts string of comma-separated values into set
-def comma_separated_string_to_set(string):
-  return set(filter(None, [s.strip() for s in string.split(",")]))
+def comma_separated_string_to_list(string):
+  return list(filter(None, [s.strip() for s in string.split(",")]))
 
 # Returns set of excluded tags
 def excluded_tags():
-  return comma_separated_string_to_set(opts.e621_prompt_excluded_tags)
+  return comma_separated_string_to_list(opts.e621_prompt_excluded_tags)
 
 # Returns set of appended tags, replacing underscores if needed
 def appended_tags():
-  tags = comma_separated_string_to_set(opts.e621_prompt_appended_tags)
+  tags = comma_separated_string_to_list(opts.e621_prompt_appended_tags)
 
   if opts.e621_prompt_replace_underscores_in_appended:
-    return set([replace_underscores(tag) for tag in tags])
+    return [replace_underscores(tag) for tag in tags]
 
   return tags
 
@@ -147,9 +146,11 @@ class Script(scripts.Script):
   # Formats tags from category, excluding tags from the settings, adding prefix and replacing underscores if needed
   def format_category(self, post, category):
     prefix = getattr(opts, f"e621_prompt_{category}_prefix")
-    tags = set(post["tags"][category] or []) - excluded_tags()
+    # God I "love" Python. There was a bunch of sets and "-" between them, but we can't use sets
+    # due to ordering reasons...
+    tags = [tag for tag in (post["tags"][category] or []) if tag not in excluded_tags()]
 
-    return set([f"{prefix}{escape_special_characters(replace_underscores(tag))}" for tag in tags])
+    return [f"{prefix}{escape_special_characters(replace_underscores(tag))}" for tag in tags]
 
   # Converts post data into tags
   def process_post(self, post, categories):
@@ -159,16 +160,17 @@ class Script(scripts.Script):
       case ("post", p):
         post = p
 
-    result = set()
+    result = []
 
     for category in categories:
       match category:
         case 'rating':
-          result.add(self.format_rating(post))
+          result.append(self.format_rating(post))
         case _:
-          result = result | self.format_category(post, category)
+          result = result + self.format_category(post, category)
 
-    result = result | appended_tags()
+    tags_to_append = [tag for tag in appended_tags() if tag not in result]
+    result = result + tags_to_append
 
     return ("result", ", ".join(result))
 
@@ -228,11 +230,16 @@ class Script(scripts.Script):
             generate_btn = gr.Button("Generate", variant="primary")
             generate_btn.click(fn=self.generate_callback, inputs=[source, categories], outputs=[result])
 
+    # This return is required, because otherwise "path" in ui_config.json and "Defaults" section of the settings
+    # would be really wrong
+    return [source, file_source, categories, result, clear_btn, generate_btn]
+
 # Settings section
 def on_ui_settings():
   default_excluded_tags = ", ".join([
     "comic", "watermark", "text", "sign", "patreon_logo", "internal", "censored", "censored_genitalia", "censored_penis", "censored_pussy",
     "censored_text", "censored_anus", "multiple_poses", "multiple_images", "dialogue", "speech_bubble", "english_text", "dialogue_box",
+    "subtitled", "thought_bubble", "cutaway"
   ])
 
   section = ("e621-prompt", NAME)
