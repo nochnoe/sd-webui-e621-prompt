@@ -236,6 +236,7 @@ def on_ui_settings():
   default_excluded_tags = ", ".join([
     "comic", "watermark", "text", "sign", "patreon_logo", "internal", "censored", "censored_genitalia", "censored_penis", "censored_pussy",
     "censored_text", "censored_anus", "multiple_poses", "multiple_images", "dialogue", "speech_bubble", "english_text", "dialogue_box",
+    "subtitled", "thought_bubble", "cutaway"
   ])
 
   section = ("e621-prompt", NAME)
