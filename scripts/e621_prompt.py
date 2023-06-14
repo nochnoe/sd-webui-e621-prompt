@@ -28,19 +28,19 @@ def escape_special_characters(value):
   return value.replace("(", "\(").replace(")", "\)")
 
 # Converts string of comma-separated values into set
-def comma_separated_string_to_set(string):
-  return set(filter(None, [s.strip() for s in string.split(",")]))
+def comma_separated_string_to_list(string):
+  return list(filter(None, [s.strip() for s in string.split(",")]))
 
 # Returns set of excluded tags
 def excluded_tags():
-  return comma_separated_string_to_set(opts.e621_prompt_excluded_tags)
+  return comma_separated_string_to_list(opts.e621_prompt_excluded_tags)
 
 # Returns set of appended tags, replacing underscores if needed
 def appended_tags():
-  tags = comma_separated_string_to_set(opts.e621_prompt_appended_tags)
+  tags = comma_separated_string_to_list(opts.e621_prompt_appended_tags)
 
   if opts.e621_prompt_replace_underscores_in_appended:
-    return set([replace_underscores(tag) for tag in tags])
+    return [replace_underscores(tag) for tag in tags]
 
   return tags
 
@@ -146,9 +146,11 @@ class Script(scripts.Script):
   # Formats tags from category, excluding tags from the settings, adding prefix and replacing underscores if needed
   def format_category(self, post, category):
     prefix = getattr(opts, f"e621_prompt_{category}_prefix")
-    tags = set(post["tags"][category] or []) - excluded_tags()
+    # God I "love" Python. There was a bunch of sets and "-" between them, but we can't use sets
+    # due to ordering reasons...
+    tags = [tag for tag in (post["tags"][category] or []) if tag not in excluded_tags()]
 
-    return set([f"{prefix}{escape_special_characters(replace_underscores(tag))}" for tag in tags])
+    return [f"{prefix}{escape_special_characters(replace_underscores(tag))}" for tag in tags]
 
   # Converts post data into tags
   def process_post(self, post, categories):
@@ -158,16 +160,17 @@ class Script(scripts.Script):
       case ("post", p):
         post = p
 
-    result = set()
+    result = []
 
     for category in categories:
       match category:
         case 'rating':
-          result.add(self.format_rating(post))
+          result.append(self.format_rating(post))
         case _:
-          result = result | self.format_category(post, category)
+          result = result + self.format_category(post, category)
 
-    result = result | appended_tags()
+    tags_to_append = [tag for tag in appended_tags() if tag not in result]
+    result = result + tags_to_append
 
     return ("result", ", ".join(result))
 
