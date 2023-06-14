@@ -13,8 +13,8 @@ import requests
 NAME = "e621 Prompt"
 
 # List of tags categories. Shared between settings and UI
-tags_categories_options = ["general", "species", "character", "copyright", "artist", "invalid", "lore", "meta", "rating"]
-default_tags_categories = ["general", "species", "character", "artist"]
+tags_categories_options = ["artist", "character", "species", "copyright", "general", "lore", "meta", "rating", "invalid"]
+default_tags_categories = ["artist", "character", "species", "general"]
 
 # Conditionally replaces underscores
 def replace_underscores(value):
