@@ -228,6 +228,10 @@ class Script(scripts.Script):
             generate_btn = gr.Button("Generate", variant="primary")
             generate_btn.click(fn=self.generate_callback, inputs=[source, categories], outputs=[result])
 
+    # This return is required, because otherwise "path" in ui_config.json and "Defaults" section of the settings
+    # would be really wrong
+    return [source, file_source, categories, result, clear_btn, generate_btn]
+
 # Settings section
 def on_ui_settings():
   default_excluded_tags = ", ".join([
