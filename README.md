@@ -43,10 +43,10 @@ Please adhere to the Github TOS and **do not post** any NSFW imagery or tags in 
 
 ## Model-specific settings
 
-### Fluffusion
+### Fluffusion R1
 
 - Replace underscores with spaces checked
-- All prefixes are empty
+- Prefix for artists: `by ` (with a space)
 - Do not select "rating" category
 
 ### Fluffyrock / Furryrock / Yiffymix v2.1, v2.2
