@@ -220,7 +220,7 @@ class Script(scripts.Script):
           label="Categories"
         )
 
-        result = gr.Textbox(value="", label="Result", lines=5, interactive=False).style(show_copy_button=True)
+        result = gr.Textbox(value="", label="Result", lines=5, interactive=False, show_copy_button=True)
 
         with gr.Row():
           with gr.Column():
