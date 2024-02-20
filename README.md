@@ -18,8 +18,8 @@ Request tags of an image from e621, inspired by [`sd-webui-gelbooru-prompt`](htt
 
 ## Requirements
 
-- Python 3.10+
-- sd-webui v1.3.2 (may work with the previous versions, but untested)
+- Python 3.10+ (will **NOT** work with the Python 3.9)
+- sd-webui v1.7.0 (but may work with the previous versions, extension code hasn't changed much since sd-webui v1.3.2)
 
 ## Development
 
@@ -56,6 +56,11 @@ Please adhere to the Github TOS and **do not post** any NSFW imagery or tags in 
 - Do not select "meta" category
 
 ## Changelog
+
+### 20.02.2024
+
+- Fixed deprecation warning
+- Tested with latest sd-webui, still working :)
 
 ### 14.06.2023
 
